@@ -141,27 +141,29 @@ namespace Microsoft.Azure.Devices.E2ETests
             string certBase64 = Environment.GetEnvironmentVariable("IOTHUB_X509_PFX_CERTIFICATE");
 
             Byte[] buff = Convert.FromBase64String(certBase64);
+            Debug.WriteLine("after Convert.FromBase64String");
 
             var cert = new X509Certificate2(buff);
 
             var auth = new DeviceAuthenticationWithX509Certificate(deviceInfo.Item1, cert);
             var deviceClient = DeviceClient.Create(deviceInfo.Item2, auth, transport);
-
+            Debug.WriteLine("after Create");
             try
             {
                 await deviceClient.OpenAsync();
-
+                Debug.WriteLine("after OpenAsync");
                 string payload;
                 string p1Value;
                 Client.Message testMessage = ComposeD2CTestMessage(out payload, out p1Value);
                 await deviceClient.SendEventAsync(testMessage);
-
+                Debug.WriteLine("after SendEventAsync");
                 bool isReceived = false;
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 while (!isReceived && sw.Elapsed.Minutes < 1)
                 {
                     var events = await eventHubReceiver.ReceiveAsync(int.MaxValue, TimeSpan.FromSeconds(5));
+                    Debug.WriteLine("after ReceiveAsync");
                     isReceived = VerifyTestMessage(events, deviceInfo.Item1, payload, p1Value);
                 }
                 sw.Stop();
@@ -171,9 +173,13 @@ namespace Microsoft.Azure.Devices.E2ETests
             finally
             {
                 await deviceClient.CloseAsync();
+                Debug.WriteLine("after deviceClient.CloseAsync");
                 await eventHubReceiver.CloseAsync();
+                Debug.WriteLine("after eventHubReceiver.CloseAsync");
                 await eventHubClient.CloseAsync();
+                Debug.WriteLine("after eventHubClient.CloseAsync");
                 TestUtil.RemoveDevice(deviceInfo.Item1, registryManager);
+                Debug.WriteLine("after RemoveDevice.CloseAsync");
             }
         }
 
@@ -282,35 +288,42 @@ namespace Microsoft.Azure.Devices.E2ETests
 
             string certBase64 = Environment.GetEnvironmentVariable("IOTHUB_X509_PFX_CERTIFICATE");
             Byte[] buff = Convert.FromBase64String(certBase64);
-
+            Debug.WriteLine("after Convert.FromBase64String");
             var cert = new X509Certificate2(buff);
 
             var auth = new DeviceAuthenticationWithX509Certificate(deviceInfo.Item1, cert);
             var deviceClient = DeviceClient.Create(deviceInfo.Item2, auth, transport);
-
+            Debug.WriteLine("after Create");
             try
             {
                 await deviceClient.OpenAsync();
-
+                Debug.WriteLine("after OpenAsync");
                 if (transport == Client.TransportType.Mqtt_Tcp_Only ||
                     transport == Client.TransportType.Mqtt_WebSocket_Only)
                 {
                     // Dummy ReceiveAsync to ensure mqtt subscription registration before SendAsync() is called on service client.
                     await deviceClient.ReceiveAsync(TimeSpan.FromSeconds(2));
+                    Debug.WriteLine("deviceClient.ReceiveAsync");
                 }
 
                 string payload, messageId, p1Value;
                 await serviceClient.OpenAsync();
+                Debug.WriteLine("after serviceClient.OpenAsync");
                 await serviceClient.SendAsync(deviceInfo.Item1,
                     ComposeC2DTestMessage(out payload, out messageId, out p1Value));
+                Debug.WriteLine("after ComposeC2DTestMessage");
 
                 await VerifyReceivedC2DMessage(transport, deviceClient, payload, p1Value);
+                Debug.WriteLine("after VerifyReceivedC2DMessage");
             }
             finally
             {
                 await deviceClient.CloseAsync();
+                Debug.WriteLine("after deviceClient.CloseAsync");
                 await serviceClient.CloseAsync();
+                Debug.WriteLine("after serviceClient.CloseAsync");
                 TestUtil.RemoveDevice(deviceInfo.Item1, registryManager);
+                Debug.WriteLine("after RemoveDevice");
             }
         }
     }
