@@ -308,13 +308,13 @@ namespace Microsoft.Azure.Devices.E2ETests
             try
             {
                 await deviceClient.OpenAsync();
-                Debug.WriteLine("after OpenAsync");
+                Trace.WriteLine("after OpenAsync");
                 if (transport == Client.TransportType.Mqtt_Tcp_Only ||
                     transport == Client.TransportType.Mqtt_WebSocket_Only)
                 {
                     // Dummy ReceiveAsync to ensure mqtt subscription registration before SendAsync() is called on service client.
                     await deviceClient.ReceiveAsync(TimeSpan.FromSeconds(2));
-                    Debug.WriteLine("deviceClient.ReceiveAsync");
+                    Trace.WriteLine("deviceClient.ReceiveAsync");
                 }
 
                 string payload, messageId, p1Value;

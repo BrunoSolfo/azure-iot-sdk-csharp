@@ -19,6 +19,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Security.Cryptography.X509Certificates;
 #endif
 #endif
+    using System.Diagnostics;
 
     /// <summary>
     /// Delegate for desired property update callbacks.  This will be called
@@ -808,9 +809,12 @@ TODO: revisit DefaultDelegatingHandler - it seems redundant as long as we have t
 
             return result.ContinueWith(t =>
             {
+                Trace.WriteLine("ApplyTimeout before Dispose");
                 operationTimeoutCancellationTokenSource.Dispose();
+                Trace.WriteLine("ApplyTimeout after Dispose");
                 if (t.IsFaulted)
                 {
+                    Trace.WriteLine("ApplyTimeout exception: " + t.Exception.InnerException.ToString());
                     throw t.Exception.InnerException;
                 }
             });
