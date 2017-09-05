@@ -60,7 +60,7 @@ namespace Microsoft.Azure.Devices.E2ETests
         public static Tuple<string, RegistryManager> InitializeEnvironment(string devicePrefix)
         {
             string iotHubConnectionString = Environment.GetEnvironmentVariable("IOTHUB_CONN_STRING_CSHARP");
-
+            Trace.WriteLine("IOTHUB_CONN_STRING_CSHARP: " + iotHubConnectionString);
             RegistryManager rm = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
 
             // Ensure to remove all previous devices.

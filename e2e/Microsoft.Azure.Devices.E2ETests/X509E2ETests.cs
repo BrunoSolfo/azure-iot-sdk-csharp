@@ -35,15 +35,22 @@ namespace Microsoft.Azure.Devices.E2ETests
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
+            Trace.Listeners.Add(new TextWriterTraceListener($"D:\\Temp\\ReceiveSingleMessageX509_{DateTime.Now}.log"));
+            Trace.AutoFlush = true;
+            
+            Trace.WriteLine("ClassInitialize");
+
             var environment = TestUtil.InitializeEnvironment(DevicePrefix);
             hubConnectionString = environment.Item1;
             registryManager = environment.Item2;
             hostName = TestUtil.GetHostName(hubConnectionString);
+            Trace.WriteLine($"ClassInitialize hubConnectionString: {hubConnectionString}");
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
         {
+            Trace.WriteLine("ClassCleanup");
             TestUtil.UnInitializeEnvironment(registryManager);
         }
 
@@ -283,17 +290,20 @@ namespace Microsoft.Azure.Devices.E2ETests
         // It then verifies the message is received on the device.
         private async Task ReceiveSingleMessageX509(Client.TransportType transport)
         {
+            Trace.WriteLine("Started ReceiveSingleMessageX509");
+
             Tuple<string, string> deviceInfo = TestUtil.CreateDeviceWithX509(DevicePrefix, hostName, registryManager);
             ServiceClient serviceClient = ServiceClient.CreateFromConnectionString(hubConnectionString);
 
             string certBase64 = Environment.GetEnvironmentVariable("IOTHUB_X509_PFX_CERTIFICATE");
             Byte[] buff = Convert.FromBase64String(certBase64);
-            Debug.WriteLine("after Convert.FromBase64String");
+            Trace.WriteLine("after Convert.FromBase64String");
             var cert = new X509Certificate2(buff);
 
             var auth = new DeviceAuthenticationWithX509Certificate(deviceInfo.Item1, cert);
             var deviceClient = DeviceClient.Create(deviceInfo.Item2, auth, transport);
-            Debug.WriteLine("after Create");
+
+            Trace.WriteLine("after Create");
             try
             {
                 await deviceClient.OpenAsync();
@@ -308,22 +318,22 @@ namespace Microsoft.Azure.Devices.E2ETests
 
                 string payload, messageId, p1Value;
                 await serviceClient.OpenAsync();
-                Debug.WriteLine("after serviceClient.OpenAsync");
+                Trace.WriteLine("after serviceClient.OpenAsync");
                 await serviceClient.SendAsync(deviceInfo.Item1,
                     ComposeC2DTestMessage(out payload, out messageId, out p1Value));
-                Debug.WriteLine("after ComposeC2DTestMessage");
+                Trace.WriteLine("after ComposeC2DTestMessage");
 
                 await VerifyReceivedC2DMessage(transport, deviceClient, payload, p1Value);
-                Debug.WriteLine("after VerifyReceivedC2DMessage");
+                Trace.WriteLine("after VerifyReceivedC2DMessage");
             }
             finally
             {
                 await deviceClient.CloseAsync();
-                Debug.WriteLine("after deviceClient.CloseAsync");
+                Trace.WriteLine("after deviceClient.CloseAsync");
                 await serviceClient.CloseAsync();
-                Debug.WriteLine("after serviceClient.CloseAsync");
+                Trace.WriteLine("after serviceClient.CloseAsync");
                 TestUtil.RemoveDevice(deviceInfo.Item1, registryManager);
-                Debug.WriteLine("after RemoveDevice");
+                Trace.WriteLine("after RemoveDevice");
             }
         }
     }
