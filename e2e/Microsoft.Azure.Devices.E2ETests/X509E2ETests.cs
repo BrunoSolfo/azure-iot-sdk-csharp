@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Devices.E2ETests
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Trace.Listeners.Add(new TextWriterTraceListener($"D:\\Temp\\ReceiveSingleMessageX509_{DateTime.Now}.log"));
+            Trace.Listeners.Add(new TextWriterTraceListener($"ReceiveSingleMessageX509_{DateTime.Now}.log"));
             Trace.AutoFlush = true;
             
             Trace.WriteLine("ClassInitialize");
