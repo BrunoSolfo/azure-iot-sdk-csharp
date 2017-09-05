@@ -809,12 +809,18 @@ TODO: revisit DefaultDelegatingHandler - it seems redundant as long as we have t
 
             return result.ContinueWith(t =>
             {
+#if !WINDOWS_UWP
                 Trace.WriteLine("ApplyTimeout before Dispose");
+#endif
                 operationTimeoutCancellationTokenSource.Dispose();
+#if !WINDOWS_UWP
                 Trace.WriteLine("ApplyTimeout after Dispose");
+#endif
                 if (t.IsFaulted)
                 {
+#if !WINDOWS_UWP
                     Trace.WriteLine("ApplyTimeout exception: " + t.Exception.InnerException.ToString());
+#endif
                     throw t.Exception.InnerException;
                 }
             });
