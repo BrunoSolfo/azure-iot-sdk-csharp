@@ -294,6 +294,7 @@ namespace Microsoft.Azure.Devices.E2ETests
 
             Tuple<string, string> deviceInfo = TestUtil.CreateDeviceWithX509(DevicePrefix, hostName, registryManager);
             ServiceClient serviceClient = ServiceClient.CreateFromConnectionString(hubConnectionString);
+            Trace.WriteLine("Device Id: " + deviceInfo.Item1);
 
             string certBase64 = Environment.GetEnvironmentVariable("IOTHUB_X509_PFX_CERTIFICATE");
             Byte[] buff = Convert.FromBase64String(certBase64);
@@ -326,12 +327,18 @@ namespace Microsoft.Azure.Devices.E2ETests
                 await VerifyReceivedC2DMessage(transport, deviceClient, payload, p1Value);
                 Trace.WriteLine("after VerifyReceivedC2DMessage");
             }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.ToString());
+                throw;
+            }
             finally
             {
                 await deviceClient.CloseAsync();
                 Trace.WriteLine("after deviceClient.CloseAsync");
                 await serviceClient.CloseAsync();
                 Trace.WriteLine("after serviceClient.CloseAsync");
+                Trace.WriteLine("Before remove device: " + deviceInfo.Item1);
                 TestUtil.RemoveDevice(deviceInfo.Item1, registryManager);
                 Trace.WriteLine("after RemoveDevice");
             }
